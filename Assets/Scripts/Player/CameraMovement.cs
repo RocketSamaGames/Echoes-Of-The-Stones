@@ -4,38 +4,36 @@ using UnityEngine;
 
 public class CameraMovement : MonoBehaviour
 {
-    // Variable para la sensibilidad de la cámara
-    public float mouseSensitivity = 100f;
+    public Vector2 sensitivity;
 
-    // Obtenemos el gameobject de nuestro jugador. Como es pública, lo añadimos desde Unity
-    public Transform playerBody;
-
-    private float rotationX = 0f;
-
-    void Start()
+    [SerializeField] private Transform gameCamera;
+    private void Start()
     {
-        // Limitamos el movimiento del ratón a la ventana Game
         Cursor.lockState = CursorLockMode.Locked;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        // Variables que almacenan el movimiento del ratón en el eje X e Y. Se multiplican por la sensibilidad
-        // y por Time.deltaTime (esto último sirve para que el comportamiento no varíe en distintos ordenadores por los FPS)
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+        float mouseX = Input.GetAxis("Mouse X");
 
-        #region HorizontalRotation
-        // Con esto hacemos que el personaje gire en el eje horizontal (es decir, hacia arriba/abajo)
-        rotationX -= mouseY;
-        rotationX = Mathf.Clamp(rotationX, -90, 90); // Limitamos el movimiento de la cámara para que como máximo gire a 90 o -90 grados
-        transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
-        #endregion
+        float mouseY = Input.GetAxis("Mouse Y");
 
-        #region VerticalRotation
-        // Con esto hacemos que el personaje gire en el eje vertical (es decir, hacia izquierda/derecha)
-        playerBody.Rotate(Vector3.up * mouseX);
-        #endregion
+        if (mouseX != 0)
+        {
+            transform.Rotate(Vector3.up * mouseX * sensitivity.x);
+        }
+
+        if (mouseY != 0)
+        {
+            float angle = (gameCamera.localEulerAngles.x - mouseY * sensitivity.y + 360) % 360;
+            if (angle > 180)
+            {
+                angle -= 360;
+            }
+
+            angle = Mathf.Clamp(angle, -90, 80);
+            
+            gameCamera.localEulerAngles = Vector3.right * angle;
+        }
     }
 }
